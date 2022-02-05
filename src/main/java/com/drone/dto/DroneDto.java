@@ -17,12 +17,12 @@ public class DroneDto {
 
     private static final int SERIAL_NUMBER_MIN = 3;
     private static final int SERIAL_NUMBER_MAX = 100;
-    private static final int WEIGHT_LIMIT_MIN = 0;
-    private static final int WEIGHT_LIMIT_MAX = 500;
     private static final int WEIGHT_LIMIT_DEFAULT = 100;
+    private static final int WEIGHT_LIMIT_MIN = 100;
+    private static final int WEIGHT_LIMIT_MAX = 500;
+    private static final int BATTERY_LEVEL_DEFAULT = 100;
     private static final int BATTERY_LEVEL_MIN = 100;
     private static final int BATTERY_LEVEL_MAX = 100;
-    private static final int BATTERY_LEVEL_DEFAULT = 100;
 
     @Size(max = SERIAL_NUMBER_MAX, min = SERIAL_NUMBER_MIN)
     @NotNull

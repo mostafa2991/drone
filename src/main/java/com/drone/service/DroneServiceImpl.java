@@ -22,7 +22,7 @@ public class DroneServiceImpl implements DroneService {
 
     @Override
     public ResponseEntity<Object> addDrone(DroneDto droneDto) {
-        Drone drone = DroneMapper.INSTANCE.DtoToEntity(droneDto);
+        Drone drone = DroneMapper.INSTANCE.dtoToEntity(droneDto);
         Long registeredDrones = countDrones();
         if (registeredDrones < 10) {
             try {

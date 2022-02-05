@@ -11,7 +11,6 @@ import java.util.*;
 @Entity
 @Data
 @Table(name = "drone")
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

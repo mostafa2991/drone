@@ -4,6 +4,7 @@ import com.drone.dto.MedicationDto;
 import com.drone.entities.Drone;
 import com.drone.entities.Medication;
 import com.drone.enums.State;
+import com.drone.mapper.DroneMapper;
 import com.drone.mapper.MedicationMapper;
 import com.drone.repositories.MedicationRepository;
 import com.drone.util.api.ResponseHandler;
@@ -25,10 +26,12 @@ public class MedicationServiceImpl implements MedicationService {
     private DroneService droneService;
 
     @Override
-    public ResponseEntity<Object> addMedication(Medication medication) {
+    public ResponseEntity<Object> addMedication(MedicationDto medicationDto) {
+        Medication medication = MedicationMapper.INSTANCE.dtoToEntity(medicationDto);
         try {
             Medication newMedication = medicationRepository.save(medication);
-            return ResponseHandler.generateResponse("Successfully created new medication!", HttpStatus.OK, newMedication);
+            MedicationDto newMedicationDto = MedicationMapper.INSTANCE.entityToDto(newMedication);
+            return ResponseHandler.generateResponse("Successfully created new medication!", HttpStatus.OK, newMedicationDto);
         } catch (Exception e) {
             return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
         }
@@ -46,44 +49,43 @@ public class MedicationServiceImpl implements MedicationService {
 
     @Override
     public ResponseEntity<Object> assignMedicationToDrone(Long medicationId, Long droneId) {
-        Drone getDrone = droneService.getDroneById(droneId);
-        if(getDrone.getBatteryLevel()<25 ) {
-            return ResponseHandler.generateResponse("Drone: "+getDrone.getId().toString()+" can't load battery < 25", HttpStatus.OK, null);
-        }
-        if(getDrone.getState()!=State.IDLE && getDrone.getState()!=State.LOADING  ) {
-            return ResponseHandler.generateResponse("Drone: "+getDrone.getId().toString()+" is not ready to load items", HttpStatus.OK, null);
-        }
-        int droneAvailableWeight = getDrone.getWeightLimit();
-        Medication getMedication = getMedicationById(medicationId);
-        int medicationWeight = getMedication.getWeight();
-        if (droneAvailableWeight < medicationWeight) {
-            return ResponseHandler.generateResponse("Medication: " + getMedication.getId().toString() +
-                    " Can't be loaded in drone: " + getDrone.getSerialNumber().toString() + " over weight", HttpStatus.OK, null);
-        } else {
-            getDrone.setWeightLimit(droneAvailableWeight-medicationWeight);
-            getDrone.setState(State.LOADING);
-            getMedication.setDrone(getDrone);
-            addMedication(getMedication);
-            if(getDrone.getWeightLimit()==0) getDrone.setState(State.LOADED);
-            return ResponseHandler.generateResponse("Medication: " + getMedication.getId().toString() +
-                    " Set correctly with Drone: " + getDrone.getSerialNumber().toString(), HttpStatus.OK, null);
-        }
-
-
+//        Drone getDrone = droneService.getDroneById(droneId);
+//        if (getDrone.getBatteryLevel() < 25) {
+//            return ResponseHandler.generateResponse("Drone: " + getDrone.getId().toString() + " can't load battery < 25", HttpStatus.OK, null);
+//        }
+//        if (getDrone.getState() != State.IDLE && getDrone.getState() != State.LOADING) {
+//            return ResponseHandler.generateResponse("Drone: " + getDrone.getId().toString() + " is not ready to load items", HttpStatus.OK, null);
+//        }
+//        int droneAvailableWeight = getDrone.getWeightLimit();
+//        Medication getMedication = getMedicationById(medicationId);
+//        int medicationWeight = getMedication.getWeight();
+//        if (droneAvailableWeight < medicationWeight) {
+//            return ResponseHandler.generateResponse("Medication: " + getMedication.getId().toString() +
+//                    " Can't be loaded in drone: " + getDrone.getSerialNumber().toString() + " over weight", HttpStatus.OK, null);
+//        } else {
+//            getDrone.setWeightLimit(droneAvailableWeight - medicationWeight);
+//            getDrone.setState(State.LOADING);
+//            getMedication.setDrone(getDrone);
+//            addMedication(getMedication);
+//            if (getDrone.getWeightLimit() == 0) getDrone.setState(State.LOADED);
+//            return ResponseHandler.generateResponse("Medication: " + getMedication.getId().toString() +
+//                    " Set correctly with Drone: " + getDrone.getSerialNumber().toString(), HttpStatus.OK, null);
+//        }
+        return null;
     }
 
     @Override
     public ResponseEntity<Object> getMedicationByDroneId(Long droneId) {
-        List<Medication> medications= medicationRepository.getMedicationByDroneId(droneId);
-        if(medications==null){
-            return ResponseHandler.generateResponse("No medication available for drone: " +droneId, HttpStatus.NOT_FOUND, null);
+        List<Medication> medications = medicationRepository.getMedicationByDroneId(droneId);
+        if (medications == null) {
+            return ResponseHandler.generateResponse("No medication available for drone: " + droneId, HttpStatus.NOT_FOUND, null);
         }
         List<MedicationDto> medicationsDto = new ArrayList<>();
-        for(Medication medication :medications){
+        for (Medication medication : medications) {
             MedicationDto medicationDto = MedicationMapper.INSTANCE.entityToDto(medication);
             medicationsDto.add(medicationDto);
         }
-        return ResponseHandler.generateResponse("The available medication for drone: " +droneId +" are:", HttpStatus.OK, medicationsDto);
+        return ResponseHandler.generateResponse("The available medication for drone: " + droneId + " are:", HttpStatus.OK, medicationsDto);
     }
 
 

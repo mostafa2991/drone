@@ -12,6 +12,7 @@ public interface DroneService {
     Drone getDroneById(Long droneId);
     ResponseEntity<Object> getDroneDtoById(Long droneId);
     List<Drone> getDrones();
+
     long countDrones();
     ResponseEntity<Object> getAvailableDroneForLoading();
     int getBatteryLevelByDroneId(Long droneId);

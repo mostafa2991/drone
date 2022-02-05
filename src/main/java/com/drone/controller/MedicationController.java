@@ -28,8 +28,8 @@ public class MedicationController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createMedication(@Valid @RequestBody Medication medication) {
-        return medicationService.addMedication(medication);
+    public ResponseEntity<Object> createMedication(@Valid @RequestBody MedicationDto medicationDto) {
+        return medicationService.addMedication(medicationDto);
     }
 
     @PostMapping("/assign/{medicationId}/{droneId}")
