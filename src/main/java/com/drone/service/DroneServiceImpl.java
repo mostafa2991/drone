@@ -21,12 +21,13 @@ public class DroneServiceImpl implements DroneService {
     private DroneRepository droneRepository;
 
     @Override
-    public ResponseEntity<Object> addDrone(Drone drone) {
+    public ResponseEntity<Object> addDrone(DroneDto droneDto) {
+        Drone drone = DroneMapper.INSTANCE.DtoToEntity(droneDto);
         Long registeredDrones = countDrones();
         if (registeredDrones < 10) {
             try {
                 Drone newDrone = droneRepository.save(drone);
-                DroneDto droneDto = DroneMapper.INSTANCE.entityToDto(newDrone);
+                DroneDto newDroneDto = DroneMapper.INSTANCE.entityToDto(newDrone);
                 return ResponseHandler.generateResponse("Successfully registered new drone!", HttpStatus.OK, droneDto);
             } catch (Exception e) {
                 return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
