@@ -14,5 +14,8 @@ public interface DroneRepository extends JpaRepository<Drone, Long> {
     List<Drone> getAvailableDroneForLoading();
 
     @Query(value = "SELECT d.BATTERY_LEVEL FROM DRONE d WHERE d.iD = ?1", nativeQuery = true)
-    int getBatteryLevelByDroneId(Long droneId);
+    Drone getBatteryLevelByDroneId(Long droneId);
+
+    Drone findBySerialNumber(String serialNumber);
+
 }

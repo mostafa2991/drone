@@ -9,8 +9,8 @@ import java.util.List;
 public interface MedicationService {
 
     ResponseEntity<Object> addMedication(MedicationDto medicationDto);
+    ResponseEntity<Object> getMedicationDtoById(long  id);
     Medication getMedicationById(long  id);
-    List<Medication> getAllMedication();
     ResponseEntity<Object> assignMedicationToDrone(Long medicationId,Long droneId);
     ResponseEntity<Object> getMedicationByDroneId(Long droneId);
 }

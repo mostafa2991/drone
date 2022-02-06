@@ -4,6 +4,7 @@ import com.drone.entities.Medication;
 import com.drone.enums.Model;
 import com.drone.enums.State;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.EnumType;
@@ -13,6 +14,7 @@ import java.util.Set;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class DroneDto {
 
     private static final int SERIAL_NUMBER_MIN = 3;
@@ -35,9 +37,9 @@ public class DroneDto {
     @Max(BATTERY_LEVEL_MAX)
     @Min(BATTERY_LEVEL_MIN)
     private int batteryLevel;
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
     private State state;
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
     private Model model;
     @Null
     private Set<Medication> medications;

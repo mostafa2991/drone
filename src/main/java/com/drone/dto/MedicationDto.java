@@ -7,6 +7,7 @@ import javax.validation.constraints.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class MedicationDto {
 
     private static final int NAME_MIN = 3;

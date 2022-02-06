@@ -33,18 +33,22 @@ public class MedicationServiceImpl implements MedicationService {
             MedicationDto newMedicationDto = MedicationMapper.INSTANCE.entityToDto(newMedication);
             return ResponseHandler.generateResponse("Successfully created new medication!", HttpStatus.OK, newMedicationDto);
         } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
+            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.CONFLICT, "No Medication has been saved");
         }
+    }
+
+    // need to return suppose code
+    @Override
+    public ResponseEntity<Object> getMedicationDtoById(long id) {
+        Medication getMedication = medicationRepository.getById(id);
+        MedicationDto medicationDto = MedicationMapper.INSTANCE.entityToDto(getMedication);
+        return ResponseHandler.generateResponse("getMedication with ID: " + medicationDto.getCode(), HttpStatus.OK, medicationDto);
     }
 
     @Override
     public Medication getMedicationById(long id) {
-        return medicationRepository.getById(id);
-    }
-
-    @Override
-    public List<Medication> getAllMedication() {
-        return medicationRepository.findAll();
+        Medication medication = medicationRepository.getById(id);
+        return medication;
     }
 
     @Override

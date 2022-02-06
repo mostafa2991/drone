@@ -22,7 +22,9 @@ public class Drone {
     private String serialNumber;
     private int weightLimit;
     private int batteryLevel;
+    @Enumerated(EnumType.STRING)
     private State state;
+    @Enumerated(EnumType.STRING)
     private Model model;
     @OneToMany(mappedBy = "drone")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

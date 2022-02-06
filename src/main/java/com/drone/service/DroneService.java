@@ -8,13 +8,11 @@ import java.util.List;
 
 public interface DroneService {
 
-    ResponseEntity<Object> addDrone(DroneDto droneDto);
-    Drone getDroneById(Long droneId);
-    ResponseEntity<Object> getDroneDtoById(Long droneId);
-    List<Drone> getDrones();
-
     long countDrones();
+    Drone getDroneBySerialNumber(String serialNumber);
+    ResponseEntity<Object> getDrone(String serialNumber);
+    ResponseEntity<Object> addDrone(DroneDto droneDto);
     ResponseEntity<Object> getAvailableDroneForLoading();
-    int getBatteryLevelByDroneId(Long droneId);
+    ResponseEntity<Object> getBatteryLevelByDroneId(Long droneId);
 
 }

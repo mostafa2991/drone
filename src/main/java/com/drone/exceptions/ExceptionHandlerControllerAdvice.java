@@ -2,6 +2,7 @@ package com.drone.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -49,6 +50,11 @@ public class ExceptionHandlerControllerAdvice {
             errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
         }
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    protected ResponseEntity<Object> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        return new ResponseEntity<>("please use right state or model", HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BadUrlException.class)
