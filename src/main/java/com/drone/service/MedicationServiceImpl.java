@@ -4,17 +4,18 @@ import com.drone.dto.MedicationDto;
 import com.drone.entities.Drone;
 import com.drone.entities.Medication;
 import com.drone.enums.State;
-import com.drone.mapper.DroneMapper;
+import com.drone.exceptions.AlreadyExistException;
+import com.drone.exceptions.NotFoundException;
 import com.drone.mapper.MedicationMapper;
+import com.drone.repositories.DroneRepository;
 import com.drone.repositories.MedicationRepository;
-import com.drone.util.api.ResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -23,74 +24,61 @@ public class MedicationServiceImpl implements MedicationService {
     @Autowired
     private MedicationRepository medicationRepository;
     @Autowired
-    private DroneService droneService;
+    private DroneRepository droneRepository;
 
     @Override
-    public ResponseEntity<Object> addMedication(MedicationDto medicationDto) {
-        Medication medication = MedicationMapper.INSTANCE.dtoToEntity(medicationDto);
-        try {
-            Medication newMedication = medicationRepository.save(medication);
-            MedicationDto newMedicationDto = MedicationMapper.INSTANCE.entityToDto(newMedication);
-            return ResponseHandler.generateResponse("Successfully created new medication!", HttpStatus.OK, newMedicationDto);
-        } catch (Exception e) {
-            return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.CONFLICT, "No Medication has been saved");
-        }
-    }
-
-    // need to return suppose code
-    @Override
-    public ResponseEntity<Object> getMedicationDtoById(long id) {
-        Medication getMedication = medicationRepository.getById(id);
-        MedicationDto medicationDto = MedicationMapper.INSTANCE.entityToDto(getMedication);
-        return ResponseHandler.generateResponse("getMedication with ID: " + medicationDto.getCode(), HttpStatus.OK, medicationDto);
+    public MedicationDto addMedication(MedicationDto medicationDto) {
+        String code = medicationDto.getCode();
+        Medication medication = medicationRepository.findByCode(code);
+        if (Objects.nonNull(medication)) throw new AlreadyExistException(code);
+        medication = MedicationMapper.INSTANCE.dtoToEntity(medicationDto);
+        medication = medicationRepository.save(medication);
+        MedicationDto newMedicationDto = MedicationMapper.INSTANCE.entityToDto(medication);
+        return newMedicationDto;
     }
 
     @Override
-    public Medication getMedicationById(long id) {
-        Medication medication = medicationRepository.getById(id);
-        return medication;
+    public MedicationDto getMedicationByCode(String code) {
+        Medication medication = Optional.ofNullable(medicationRepository.findByCode(code)).
+                orElseThrow(() -> new NotFoundException("can't find medication with code: " + code));
+        MedicationDto medicationDto = MedicationMapper.INSTANCE.entityToDto(medication);
+        return medicationDto;
     }
 
     @Override
-    public ResponseEntity<Object> assignMedicationToDrone(Long medicationId, Long droneId) {
-//        Drone getDrone = droneService.getDroneById(droneId);
-//        if (getDrone.getBatteryLevel() < 25) {
-//            return ResponseHandler.generateResponse("Drone: " + getDrone.getId().toString() + " can't load battery < 25", HttpStatus.OK, null);
-//        }
-//        if (getDrone.getState() != State.IDLE && getDrone.getState() != State.LOADING) {
-//            return ResponseHandler.generateResponse("Drone: " + getDrone.getId().toString() + " is not ready to load items", HttpStatus.OK, null);
-//        }
-//        int droneAvailableWeight = getDrone.getWeightLimit();
-//        Medication getMedication = getMedicationById(medicationId);
-//        int medicationWeight = getMedication.getWeight();
-//        if (droneAvailableWeight < medicationWeight) {
-//            return ResponseHandler.generateResponse("Medication: " + getMedication.getId().toString() +
-//                    " Can't be loaded in drone: " + getDrone.getSerialNumber().toString() + " over weight", HttpStatus.OK, null);
-//        } else {
-//            getDrone.setWeightLimit(droneAvailableWeight - medicationWeight);
-//            getDrone.setState(State.LOADING);
-//            getMedication.setDrone(getDrone);
-//            addMedication(getMedication);
-//            if (getDrone.getWeightLimit() == 0) getDrone.setState(State.LOADED);
-//            return ResponseHandler.generateResponse("Medication: " + getMedication.getId().toString() +
-//                    " Set correctly with Drone: " + getDrone.getSerialNumber().toString(), HttpStatus.OK, null);
-//        }
-        return null;
+    public List<MedicationDto> getMedicationsByDroneSerialNumber(String DroneSerialNumber) {
+        Drone drone = Optional.ofNullable(droneRepository.findBySerialNumber(DroneSerialNumber)).
+                orElseThrow(() -> new NotFoundException("can't find drone with serial number: " + DroneSerialNumber));
+        Long droneId = drone.getId();
+        List<MedicationDto> medicationDtos =
+                Optional.ofNullable(medicationRepository.getMedicationsByDroneId(droneId))
+                        .map(entities -> entities.stream()
+                                .map(MedicationMapper.INSTANCE::entityToDto)
+                                .collect(Collectors.toList()))
+                        .orElseThrow(() -> new NotFoundException("No medication Available for drone: " + DroneSerialNumber));
+        return medicationDtos;
     }
-
+//fix not found exception
     @Override
-    public ResponseEntity<Object> getMedicationByDroneId(Long droneId) {
-        List<Medication> medications = medicationRepository.getMedicationByDroneId(droneId);
-        if (medications == null) {
-            return ResponseHandler.generateResponse("No medication available for drone: " + droneId, HttpStatus.NOT_FOUND, null);
-        }
-        List<MedicationDto> medicationsDto = new ArrayList<>();
-        for (Medication medication : medications) {
-            MedicationDto medicationDto = MedicationMapper.INSTANCE.entityToDto(medication);
-            medicationsDto.add(medicationDto);
-        }
-        return ResponseHandler.generateResponse("The available medication for drone: " + droneId + " are:", HttpStatus.OK, medicationsDto);
+    public MedicationDto assignMedicationToDrone(String medicationCode, String DroneSerialNumber) {
+        Drone drone = Optional.ofNullable(droneRepository.findBySerialNumber(DroneSerialNumber)).
+                orElseThrow(() -> new NotFoundException("can't find drone with serial number: " + DroneSerialNumber));
+        if (drone.getBatteryLevel() < 25)
+            throw new NotFoundException("Drone: " + DroneSerialNumber + " has low battery");
+        if (drone.getState() != State.IDLE && drone.getState() != State.LOADING)
+            throw new NotFoundException("Drone: " + DroneSerialNumber + " is not ready for loading items");
+        int droneAvailableWeight = drone.getWeightLimit();
+
+        Medication medication = Optional.ofNullable(medicationRepository.findByCode(medicationCode)).
+                orElseThrow(() -> new NotFoundException("can't find medication with code: " + medicationCode));
+        int medicationWeight = medication.getWeight();
+        if (droneAvailableWeight < medicationWeight)
+            throw new NotFoundException("Drone: " + DroneSerialNumber + "can't load medication " + medicationCode + " over weight");
+        drone.setWeightLimit(droneAvailableWeight - medicationWeight);
+        drone.setState(State.LOADING);
+        medication.setDrone(drone);
+        MedicationDto medicationDto = MedicationMapper.INSTANCE.entityToDto(medication);
+        return medicationDto;
     }
-
-
 }
+

@@ -57,6 +57,16 @@ public class ExceptionHandlerControllerAdvice {
         return new ResponseEntity<>("please use right state or model", HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AlreadyExistException.class)
+    protected ResponseEntity<Object> alreadyRegisteredDroneException(AlreadyExistException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(FullDroneException.class)
+    protected ResponseEntity<Object> fullDroneException(FullDroneException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(BadUrlException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
     public @ResponseBody

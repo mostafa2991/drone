@@ -37,9 +37,7 @@ public class DroneDto {
     @Max(BATTERY_LEVEL_MAX)
     @Min(BATTERY_LEVEL_MIN)
     private int batteryLevel;
-//    @Enumerated(EnumType.STRING)
     private State state;
-//    @Enumerated(EnumType.STRING)
     private Model model;
     @Null
     private Set<Medication> medications;

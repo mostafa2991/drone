@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/drones")
@@ -16,23 +17,23 @@ public class DroneController {
     private DroneService droneService;
 
     @PostMapping
-    public ResponseEntity<Object> addDrone(@Valid @RequestBody DroneDto droneDto) {
-        return droneService.addDrone(droneDto);
+    public ResponseEntity<DroneDto> addDrone(@Valid @RequestBody DroneDto droneDto) {
+        return ResponseEntity.ok(this.droneService.addDrone(droneDto));
     }
 
     @GetMapping("/{serialNumber}")
-    public ResponseEntity<Object> getDroneBySerialNumber(@PathVariable String serialNumber) {
-        return droneService.getDrone(serialNumber);
+    public ResponseEntity<DroneDto> getDroneBySerialNumber(@PathVariable String serialNumber) {
+        return ResponseEntity.ok().body(this.droneService.getDroneBySerialNumber(serialNumber));
     }
 
     @GetMapping("/available")
-    public ResponseEntity<Object> getAvailableDroneForLoading() {
-        return droneService.getAvailableDroneForLoading();
+    public ResponseEntity<List<DroneDto>> getAvailableDroneForLoading() {
+        return ResponseEntity.ok(this.droneService.getAvailableDroneForLoading());
     }
 
-    @GetMapping("/battery/{droneId}")
-    public ResponseEntity<Object> getBatteryLevelByDroneId(@PathVariable Long droneId) {
-        return droneService.getBatteryLevelByDroneId(droneId);
+    @GetMapping("/battery/{serialNumber}")
+    public ResponseEntity<Integer> getBatteryLevelByDroneSerialNumber(@PathVariable String serialNumber) {
+        return ResponseEntity.ok(this.droneService.getDroneBySerialNumber(serialNumber).getBatteryLevel());
     }
 }
 
