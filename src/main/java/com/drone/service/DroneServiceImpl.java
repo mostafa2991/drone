@@ -2,55 +2,46 @@ package com.drone.service;
 
 import com.drone.dto.DroneDto;
 import com.drone.entities.Drone;
+import com.drone.exceptions.AlreadyExistException;
+import com.drone.exceptions.FullDroneException;
+import com.drone.exceptions.NotFoundException;
 import com.drone.mapper.DroneMapper;
 import com.drone.repositories.DroneRepository;
-import com.drone.util.api.ResponseHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
 public class DroneServiceImpl implements DroneService {
 
+    private static final int DRONE_MAX = 10;
+
     @Autowired
     private DroneRepository droneRepository;
 
+
     @Override
-    public ResponseEntity<Object> addDrone(Drone drone) {
-        Long registeredDrones = countDrones();
-        if (registeredDrones < 10) {
-            try {
-                Drone newDrone = droneRepository.save(drone);
-                DroneDto droneDto = DroneMapper.INSTANCE.entityToDto(newDrone);
-                return ResponseHandler.generateResponse("Successfully registered new drone!", HttpStatus.OK, droneDto);
-            } catch (Exception e) {
-                return ResponseHandler.generateResponse(e.getMessage(), HttpStatus.MULTI_STATUS, null);
-            }
-        } else {
-            return ResponseHandler.generateResponse("Can't registered new drone wait for one to return!", HttpStatus.FORBIDDEN, null);
-        }
+    public DroneDto addDrone(DroneDto droneDto) {
+        if (countDrones() == DRONE_MAX) throw new FullDroneException();
+        Drone drone = droneRepository.findBySerialNumber(droneDto.getSerialNumber());
+        if (Objects.nonNull(drone)) throw new AlreadyExistException(droneDto.getSerialNumber());
+        drone = DroneMapper.INSTANCE.dtoToEntity(droneDto);
+        drone = droneRepository.save(drone);
+        DroneDto newDroneDto = DroneMapper.INSTANCE.entityToDto(drone);
+        return newDroneDto;
     }
 
     @Override
-    public Drone getDroneById(Long id) {
-        return droneRepository.getById(id);
-    }
-
-    @Override
-    public ResponseEntity<Object> getDroneDtoById(Long droneId) {
-        Drone getDrone = getDroneById(droneId);
-        DroneDto droneDto = DroneMapper.INSTANCE.entityToDto(getDrone);
-        return ResponseHandler.generateResponse("getDrone", HttpStatus.OK, droneDto);
-    }
-
-    @Override
-    public List<Drone> getDrones() {
-        return droneRepository.findAll();
+    public DroneDto getDroneBySerialNumber(String serialNumber) {
+        Drone drone = Optional.ofNullable(droneRepository.findBySerialNumber(serialNumber)).
+                orElseThrow(() -> new NotFoundException("can't find drone with serial number: " + serialNumber));
+        DroneDto droneDto = DroneMapper.INSTANCE.entityToDto(drone);
+        return droneDto;
     }
 
     @Override
@@ -60,24 +51,17 @@ public class DroneServiceImpl implements DroneService {
     }
 
     @Override
-    public ResponseEntity<Object> getAvailableDroneForLoading() {
-        List<Drone> drones= droneRepository.getAvailableDroneForLoading();
-        if(drones==null){
-            return ResponseHandler.generateResponse("No drone available for loading!", HttpStatus.NOT_FOUND, null);
-        }
-        else{
-            List<DroneDto> dronesDto = new ArrayList<>();
-            for(Drone drone : drones){
-                DroneDto droneDto = DroneMapper.INSTANCE.entityToDto(drone);
-                dronesDto.add(droneDto);
-            }
-            return ResponseHandler.generateResponse("The available drones for loading: ", HttpStatus.OK, dronesDto);
-        }
+    public List<DroneDto> getAvailableDroneForLoading() {
+
+        List<DroneDto> dronesDtos =
+                Optional.ofNullable(droneRepository.getAvailableDroneForLoading())
+                        .map(entities -> entities.stream()
+                                .map(DroneMapper.INSTANCE::entityToDto)
+                                .collect(Collectors.toList()))
+                        .orElseThrow(() -> new NotFoundException("No drones Available for loading."));
+
+        return dronesDtos;
     }
 
-    @Override
-    public int getBatteryLevelByDroneId(Long droneId) {
-        return droneRepository.getBatteryLevelByDroneId(droneId);
-    }
 
 }

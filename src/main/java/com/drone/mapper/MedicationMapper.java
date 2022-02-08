@@ -11,4 +11,5 @@ public interface MedicationMapper {
     MedicationMapper INSTANCE = Mappers.getMapper(MedicationMapper.class);
 
     MedicationDto entityToDto(Medication medication);
+    Medication dtoToEntity(MedicationDto medicationDto);
 }

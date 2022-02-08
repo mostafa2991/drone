@@ -11,4 +11,5 @@ public interface DroneMapper {
     DroneMapper INSTANCE = Mappers.getMapper(DroneMapper.class);
 
     DroneDto entityToDto(Drone drone);
+    Drone dtoToEntity(DroneDto droneDto);
 }
