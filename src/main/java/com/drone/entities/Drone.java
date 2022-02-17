@@ -18,16 +18,16 @@ public class Drone {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String serialNumber;
-    private int weightLimit;
-    private int batteryLevel;
+    private Long weightLimit;
+    private Integer batteryLevel;
     @Enumerated(EnumType.STRING)
     private State state;
     @Enumerated(EnumType.STRING)
     private Model model;
-    @OneToMany(mappedBy = "drone")
+    @OneToMany(mappedBy = "drone", fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    private Set<Medication> medications;
+    private List<Medication> medications = new ArrayList<>();
 
 }

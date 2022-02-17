@@ -37,6 +37,20 @@ public class ExceptionHandlerControllerAdvice {
         return error;
     }
 
+    @ExceptionHandler(GenericExceptionResponse.class)
+    @ResponseStatus(value = HttpStatus.NOT_FOUND)
+    public @ResponseBody
+    ExceptionResponse handleGenericExceptionResponse(final GenericExceptionResponse exception, final HttpServletRequest request) {
+
+        error = new ExceptionResponse();
+        message = exception.getMessage();
+        requestURI = request.getRequestURI();
+
+        error = setErrorProperties(error, message, requestURI);
+
+        return error;
+    }
+
     /*
       handling @param MethodArgumentNotValidException
      */
@@ -76,7 +90,7 @@ public class ExceptionHandlerControllerAdvice {
         message = exception.getMessage();
         requestURI = request.getRequestURI();
 
-        error = setErrorProperties(error, message, requestURI);
+        error = setErrorProperties(error, "Please check the URL", requestURI);
 
 
         return error;
@@ -90,7 +104,7 @@ public class ExceptionHandlerControllerAdvice {
         errorInfo.put("timestamp", new Date());
         errorInfo.put("httpCode", HttpStatus.NOT_FOUND.value());
         errorInfo.put("httpStatus", HttpStatus.NOT_FOUND.getReasonPhrase());
-        errorInfo.put("errorMessage", e.getMessage());
+        errorInfo.put("errorMessage", "Please check the URL");
         return new ResponseEntity<Map<String, Object>>(errorInfo, HttpStatus.NOT_FOUND);
     }
 

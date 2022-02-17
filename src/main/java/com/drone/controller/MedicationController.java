@@ -1,6 +1,7 @@
 package com.drone.controller;
 
 import com.drone.dto.MedicationDto;
+import com.drone.dto.ValidDroneDto;
 import com.drone.service.MedicationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,24 +18,32 @@ public class MedicationController {
     private MedicationService medicationService;
 
 
-    @GetMapping("/{medicationId}")
-    public ResponseEntity<MedicationDto> getMedication(@PathVariable String code) {
-        return ResponseEntity.ok().body(this.medicationService.getMedicationByCode(code));
+    @GetMapping("/code/{medicationCode}")
+    public ResponseEntity<MedicationDto> getMedicationByCode(@PathVariable String medicationCode) {
+
+        return ResponseEntity.ok().body(this.medicationService.getMedicationByCode(medicationCode));
+
     }
 
-    @PostMapping
+    @PostMapping("/addMedication")
     public ResponseEntity<MedicationDto> addMedication(@Valid @RequestBody MedicationDto medicationDto) {
+
         return ResponseEntity.ok(this.medicationService.addMedication(medicationDto));
+
     }
 
-    @PostMapping("/assign/{medicationCode}/{DroneSerialNumber}")
-    public ResponseEntity<MedicationDto> assignMedicationToDrone(@PathVariable String medicationCode, @PathVariable String droneSerialNumber) {
-        return ResponseEntity.ok(this.medicationService.assignMedicationToDrone(medicationCode, droneSerialNumber));
+    @PostMapping("/assign/code/{medicationCode}")
+    public ResponseEntity<String> assignMedicationToDrone(@PathVariable String medicationCode, @RequestBody ValidDroneDto validDrone) {
+
+        return ResponseEntity.ok(this.medicationService.assignMedicationToDrone(medicationCode, validDrone));
+
     }
 
-    @GetMapping("/drone/{droneId}")
-    public ResponseEntity<List<MedicationDto>> getMedicationsByDroneSerialNumber(@PathVariable String droneSerialNumber) {
-        return ResponseEntity.ok(this.medicationService.getMedicationsByDroneSerialNumber(droneSerialNumber));
+    @GetMapping("getMedication/drone/{droneId}")
+    public ResponseEntity<List<MedicationDto>> getMedicationsByDroneId(@PathVariable Integer droneId) {
+
+        return ResponseEntity.ok(this.medicationService.getMedicationsByDroneId(droneId));
+
     }
 
 }

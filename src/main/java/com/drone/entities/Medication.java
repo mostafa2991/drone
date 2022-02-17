@@ -15,12 +15,12 @@ public class Medication {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
     private String name;
-    private int weight;
+    private Long weight;
     private String code;
     private String imageUrl;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     @JoinColumn(name = "drone_id")
     private Drone drone;
