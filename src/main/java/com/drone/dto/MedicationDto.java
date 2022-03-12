@@ -24,7 +24,7 @@ public class MedicationDto {
     private String name;
     @Min(value = WEIGHT_MIN)
     @NotNull
-    private int weight;
+    private Long weight;
     @Pattern.List({
             @Pattern(regexp = "^[A-Z0-9_]+$", message = "only have _ with numbers & letters"),
             @Pattern(regexp = "^[\\S]+$", message = "not allow to have any space")
@@ -32,5 +32,5 @@ public class MedicationDto {
     @NotNull
     private String code;
     private String imageUrl;
-    private DroneDto droneDto;
+//    private DroneDto droneDto;
 }
